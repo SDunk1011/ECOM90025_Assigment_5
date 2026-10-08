@@ -16,6 +16,7 @@ quadratic LASSO, and should it be added to the regressors or replace them?
 | `data/final_coefficients.csv` | Nonzero coefficients of the submitted model. |
 | `data/submission.csv` | The Kaggle prediction file: the cross-validation winner. |
 | `data/submission_control.csv` | Control file: the Assignment 4 quadratic LASSO, unchanged. |
+| `kaggle_screenshot_circled.png` | Public leaderboard after submission (6.13947), group accounts circled. |
 
 ## Data access
 
