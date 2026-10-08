@@ -9,7 +9,7 @@ quadratic LASSO, and should it be added to the regressors or replace them?
 |---|---|
 | `assignment05.py` | The complete, standalone analysis. Downloads the data, runs PCA on the 50 regressors, cross-validates five specifications (plus two checks), refits the winner and writes the submission files. |
 | `Assignment05.ipynb` | The same code, one section per cell. |
-| `data/fig1_scree.png` | Scree plot of the 50 standardised regressors: one factor, then noise. |
+| `data/fig1_scree.png` | Scree plot of the 50 standardised regressors: one dominant component, the rest small and similar. |
 | `data/fig2_fold_differences.png` | Each specification's fold MSE minus the Assignment 4 baseline, fold by fold. |
 | `data/scree.csv`, `data/pc1_loadings.csv` | Explained variance ratios and the loadings of the factor. |
 | `data/model_scores.csv`, `data/fold_mse.csv` | Cross-validated MSE, R², fold sd and model size of every specification. |
@@ -48,7 +48,8 @@ Runtime is about 14 minutes on a laptop. Flags at the top of the script:
 
 1. **Is there a factor? (Weeks 9–10).** PCA on the 50 standardised regressors and a scree plot.
    The first component explains 21.3% of the variance; each of the other 49 explains 1.2–2.0%,
-   the flat profile of noise. So k = 1. Its score F correlates 0.62 with Y.
+   so there is no second common pattern (together they hold each variable's own 78.7%). So k = 1.
+   Its score F correlates 0.62 with Y.
 2. **Factor split (Algorithm 18, W9).** Each standardised observation is split as
    `x_i = F_i phi + e_i`, where `phi` are the PC1 loadings and `e_i` is the data Algorithm 18 is left
    with after removing the first component. (`phi_j` is also the OLS slope of X_j on F, so this is
@@ -88,13 +89,19 @@ Out-of-fold MSE on five folds. Var(Y) = 21.755, and a CV MSE is on the same scal
 | check: LASSO on PCs only | 11.168 | 0.579 | 0 / 5 | 371 PCs |
 
 F and the e_j span exactly the same space as X, so no rotation can add information. What it
-changes is which directions LASSO finds cheap. Y depends on a few individual variables (X48,
-X34, …); after a rotation each of them needs many terms, so replacing the regressors loses in
-every fold. Adding the factor beside them is harmless: LASSO keeps F and ignores the rest, and
-the gain of 0.04 is a tenth of the fold sd. The F × X_j interactions are never selected.
+changes is which terms LASSO finds cheap. The fitted models rely on a few individual variables
+(X48, X34, …). Written in F and e, a square of one becomes three terms and a product four, and
+the replacement model keeps 218 terms against 166; it loses in every fold. Adding the PCs of the
+1,325 terms doubles the candidate set and costs 0.40.
+
+Adding F and F² lowers CV MSE by 0.041 (0.6%), in three folds of five, almost all from fold 5
+(folds 1–4 average 0.003). The paired fold differences have sd 0.093, so the gain is small and
+unstable. The F × X_j model matches it in every fold, in MSE and in terms kept: no F × X_j term
+is ever selected.
 
 On the public leaderboard the submitted model scores **6.139**, against 6.127 for Assignment 4's
-quadratic LASSO: no gain out of sample either, as cross-validation predicted.
+quadratic LASSO. The small CV gain does not carry over: the public score gives no evidence of
+improvement over the control.
 
 ## Where each method comes from
 

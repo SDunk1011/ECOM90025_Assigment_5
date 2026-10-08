@@ -7,7 +7,8 @@ Competition: ecom-90025-2026-sm-2-ada-assignment-and-practice
 This script:
   1. Downloads train/test data from the Kaggle competition (same API route as Week 1).
   2. Runs PCA on the 50 standardised regressors and draws the scree plot (Week 9-10).
-     One component stands out; the other 49 explain about 2% each, like noise.
+     One component dominates; each of the other 49 explains 1.2-2.0%, so there is no second
+     common pattern.
   3. Scores five specifications on the same five outer folds as Assignments 2-4:
        baseline    A4 model: LASSO on the 1,325 degree-2 terms of X (control)
        add_F       (a) the same terms plus the factor F = PC1 and F^2
