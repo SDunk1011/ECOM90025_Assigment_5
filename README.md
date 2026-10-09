@@ -58,14 +58,15 @@ Runtime is about 14 minutes on a laptop. Flags at the top of the script:
    `patsy` formulas, `(X1 + ... + X50)**2 + I(X1**2) + ... - 1`, the way the lectures write
    interactions; a square is a variable interacted with itself.
    - **Baseline (control):** the Assignment 4 model, LASSO on the 1,325 degree-2 terms of X.
-   - **(a) add:** the same terms plus F and F².
-   - **(a) replace:** the degree-2 terms of (F, e_1, …, e_50) instead of X.
+   - **(a) add:** the same terms plus F (Algorithm 19: x and the component together).
+   - **(a) replace:** the levels and pairwise products of (F, e_1, …, e_50) instead of X. No squares
+     of F or e are used.
    - **(b) Algorithm 19:** PCA of the standardised 1,325 terms; LASSO on all PCs and the terms together.
    - **(c) Algorithm 21:** PLS on the 1,325 terms, the number of components (1–15) chosen by an
      inner 5-fold CV inside each training fold. This is the W10 rule for choosing k, applied to
      the training rows only so the fold that scores the model never helps choose it (W3).
 
-   Two checks are scored but not tabled: the (a) add model with F × X_j interactions, and LASSO
+   Two checks are scored but not tabled: the (a) add model plus F × X_j interactions, and LASSO
    on the PCs alone (principal component regression).
 4. **Penalty.** Every LASSO is standardised and refitted at each penalty on the Week 4 grid
    `np.logspace(0.5, -2.5, 60)`; AICc picks the penalty, exactly as in W4 cell 25 and
@@ -81,20 +82,20 @@ Out-of-fold MSE on five folds. Var(Y) = 21.755, and a CV MSE is on the same scal
 | Specification | CV MSE | sd over folds | Folds better than baseline | Size |
 |---|---|---|---|---|
 | Assignment 4 quadratic LASSO (control) | 6.563 | 0.521 | — | 166 terms |
-| **(a) add F, F² (submitted)** | **6.522** | 0.467 | 3 / 5 | 173 terms |
-| (a) replace X by F and e | 7.081 | 0.581 | 0 / 5 | 218 terms |
+| **(a) add F (submitted)** | **6.522** | 0.467 | 3 / 5 | 173 terms |
+| (a) replace X by F, e and their products | 7.496 | 0.669 | 0 / 5 | 229 terms |
 | (b) LASSO on PCs + terms | 6.960 | 0.609 | 0 / 5 | 194 terms |
 | (c) PLS on terms | 9.133 | 0.529 | 0 / 5 | 5–6 components |
-| check: add F, F², F × X_j | 6.522 | 0.467 | 3 / 5 | 173 terms |
+| check: add F, F × X_j | 6.522 | 0.467 | 3 / 5 | 173 terms |
 | check: LASSO on PCs only | 11.168 | 0.579 | 0 / 5 | 371 PCs |
 
-F and the e_j span exactly the same space as X, so no rotation can add information. What it
-changes is which terms LASSO finds cheap. The fitted models rely on a few individual variables
-(X48, X34, …). Written in F and e, a square of one becomes three terms and a product four, and
-the replacement model keeps 218 terms against 166; it loses in every fold. Adding the PCs of the
-1,325 terms doubles the candidate set and costs 0.40.
+F and the e_j carry the same information as X. The replacement model uses only their levels and
+pairwise products, without squares of F or e, so it cannot reproduce the squares of the original
+variables (X_j² = phi_j² F² + 2 phi_j F e_j + e_j²). Its loss of 0.93, in every fold, therefore
+mixes a change of coordinates with the loss of squares; it also keeps more terms, 229 against
+166. Adding the PCs of the 1,325 terms doubles the candidate set and costs 0.40.
 
-Adding F and F² lowers CV MSE by 0.041 (0.6%), in three folds of five, almost all from fold 5
+Adding F lowers CV MSE by 0.041 (0.6%), in three folds of five, almost all from fold 5
 (folds 1–4 average 0.003). The paired fold differences have sd 0.093, so the gain is small and
 unstable. The F × X_j model matches it in every fold, in MSE and in terms kept: no F × X_j term
 is ever selected.

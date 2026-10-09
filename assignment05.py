@@ -11,12 +11,12 @@ This script:
      common pattern.
   3. Scores five specifications on the same five outer folds as Assignments 2-4:
        baseline    A4 model: LASSO on the 1,325 degree-2 terms of X (control)
-       add_F       (a) the same terms plus the factor F = PC1 and F^2
-       replace_Fe  (a) degree-2 terms of F and the idiosyncratic parts e = X - F phi',
-                   the residual of Algorithm 18 after the first component is removed
+       add_F       (a) the same terms plus the factor F = PC1 (Algorithm 19: x and PCs together)
+       replace_Fe  (a) levels and pairwise products of F and the idiosyncratic parts
+                   e = X - F phi', the residual of Algorithm 18 (no squares of F or e)
        pca_terms   (b) Algorithm 19: PCA of the 1,325 terms, LASSO on PCs and terms together
        pls         (c) Algorithm 21: PLS on the 1,325 terms, components chosen by inner CV
-     Two checks are scored but not tabled: F x X_j interactions (add_FX) and
+     Two checks are scored but not tabled: add F plus F x X_j interactions (add_FX) and
      LASSO on the PCs alone (pcr_only).
   4. Every LASSO penalty is chosen by AICc on np.logspace(0.5, -2.5, 60), as in A2 and A4.
      All scaling, PCA and PLS are fitted on the training part of each fold only.
@@ -63,11 +63,11 @@ MAIN_SPECS = ["baseline", "add_F", "replace_Fe", "pca_terms", "pls"]
 CHECK_SPECS = ["add_FX", "pcr_only"]
 LABELS = {
     "baseline": "A4 quadratic LASSO (control)",
-    "add_F": "(a) add F, F²",
+    "add_F": "(a) add F",
     "replace_Fe": "(a) replace X by F and e",
     "pca_terms": "(b) LASSO on PCs + terms",
     "pls": "(c) PLS on terms",
-    "add_FX": "check: add F, F², F × X",
+    "add_FX": "check: add F, F × X",
     "pcr_only": "check: LASSO on PCs only",
 }
 
@@ -154,9 +154,10 @@ X_NAMES = FEATURE_COLS
 E_NAMES = [f"e{i}" for i in range(1, 51)]
 FORMULAS = {
     "baseline": quadratic(X_NAMES),
-    "add_F": quadratic(X_NAMES, " + F + I(F**2)"),
-    "add_FX": quadratic(X_NAMES, " + F + I(F**2) + F:(" + " + ".join(X_NAMES) + ")"),
-    "replace_Fe": quadratic(["F"] + E_NAMES),
+    "add_F": quadratic(X_NAMES, " + F"),
+    "add_FX": quadratic(X_NAMES, " + F + F:(" + " + ".join(X_NAMES) + ")"),
+    # levels and pairwise products of F and e only; squares of F and e are left out
+    "replace_Fe": "(" + " + ".join(["F"] + E_NAMES) + ")**2 - 1",
 }
 
 
